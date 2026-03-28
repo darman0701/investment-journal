@@ -14,6 +14,25 @@ interface TickerEvents {
   earningsTimestampStart: number | null;
   earningsTimestampEnd: number | null;
   fiscalYearEnd: number | null;
+  earningsMonths: number[];
+  fiscalYearEndMonth: number;
+}
+
+// Estimate fiscal year end from dividend months
+function estimateFiscalYearEnd(divMonths: number[]): number {
+  // Common patterns: dividends paid near fiscal year end and mid-year
+  // 3月決算 → 配当3月,9月  12月決算 → 配当6月,12月
+  if (divMonths.includes(3)) return 3;
+  if (divMonths.includes(12)) return 12;
+  if (divMonths.includes(6) && !divMonths.includes(3)) return 6;
+  if (divMonths.includes(9) && !divMonths.includes(3)) return 9;
+  return 3; // Default: most Japanese companies end in March
+}
+
+// Quarterly earnings announcement months (typically ~1.5 months after quarter end)
+function earningsMonthsFromFYE(fyeMonth: number): number[] {
+  // Q4本決算: FYE+2, Q1: FYE+5, Q2: FYE+8, Q3: FYE+11
+  return [2, 5, 8, 11].map((offset) => ((fyeMonth - 1 + offset) % 12) + 1).sort((a, b) => a - b);
 }
 
 export async function GET(req: NextRequest) {
@@ -78,6 +97,8 @@ export async function GET(req: NextRequest) {
           earningsDate = new Date(earningsStart * 1000).toISOString().slice(0, 10);
         }
 
+        const fyeMonth = meta.fiscalYearEnd || estimateFiscalYearEnd(divMonths);
+
         results[ticker] = {
           name: meta.shortName || meta.longName || ticker,
           dividends,
@@ -87,6 +108,8 @@ export async function GET(req: NextRequest) {
           earningsTimestampStart: earningsStart,
           earningsTimestampEnd: earningsEnd,
           fiscalYearEnd: meta.fiscalYearEnd || null,
+          earningsMonths: earningsMonthsFromFYE(fyeMonth),
+          fiscalYearEndMonth: fyeMonth,
         };
       } catch {
         results[ticker] = null;

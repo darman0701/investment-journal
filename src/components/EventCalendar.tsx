@@ -10,6 +10,8 @@ interface TickerEvents {
   earningsTimestampStart: number | null;
   earningsTimestampEnd: number | null;
   fiscalYearEnd: number | null;
+  earningsMonths: number[];
+  fiscalYearEndMonth: number;
 }
 
 const MONTH_NAMES = ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"];
@@ -48,14 +50,20 @@ export default function EventCalendar({ tickers, tickerNames }: Props) {
   }
 
   // Build earnings list
+  const currentMonth = new Date().getMonth() + 1;
   const earningsList = tickers
     .map((ticker) => {
       const d = data[ticker];
-      if (!d || !d.earningsDate) return null;
-      return { ticker, name: tickerNames[ticker] || d.name, date: d.earningsDate, start: d.earningsTimestampStart, end: d.earningsTimestampEnd };
+      if (!d) return null;
+      if (d.earningsDate) {
+        return { ticker, name: tickerNames[ticker] || d.name, date: d.earningsDate, start: d.earningsTimestampStart, end: d.earningsTimestampEnd, earningsMonths: d.earningsMonths, fyeMonth: d.fiscalYearEndMonth };
+      }
+      if (d.earningsMonths?.length > 0) {
+        return { ticker, name: tickerNames[ticker] || d.name, date: null, start: null, end: null, earningsMonths: d.earningsMonths, fyeMonth: d.fiscalYearEndMonth };
+      }
+      return null;
     })
-    .filter(Boolean)
-    .sort((a, b) => a!.date.localeCompare(b!.date));
+    .filter(Boolean);
 
   // Build dividend list
   const dividendList = tickers
@@ -103,27 +111,51 @@ export default function EventCalendar({ tickers, tickerNames }: Props) {
           <div className="space-y-1">
             {earningsList.length > 0 ? earningsList.map((event, i) => {
               const e = event!;
-              const earningsDate = new Date(e.date);
-              const now = new Date();
-              const daysUntil = Math.ceil((earningsDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-              const isClose = daysUntil <= 14;
-              const dateRange = e.start && e.end && e.start !== e.end
-                ? `${new Date(e.start * 1000).toLocaleDateString("ja-JP")} 〜 ${new Date(e.end * 1000).toLocaleDateString("ja-JP")}`
-                : new Date(e.date).toLocaleDateString("ja-JP");
+
+              if (e.date) {
+                const earningsDate = new Date(e.date);
+                const now = new Date();
+                const daysUntil = Math.ceil((earningsDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+                const isClose = daysUntil <= 14;
+                const dateRange = e.start && e.end && e.start !== e.end
+                  ? `${new Date(e.start * 1000).toLocaleDateString("ja-JP")} 〜 ${new Date(e.end * 1000).toLocaleDateString("ja-JP")}`
+                  : new Date(e.date).toLocaleDateString("ja-JP");
+                return (
+                  <div key={i} className="flex items-center gap-3 py-2.5 border-b border-border/50 last:border-0">
+                    <div className="w-20 text-center">
+                      <span className={`text-[12px] font-mono font-medium ${isClose ? "text-warning" : "text-primary"}`}>
+                        {dateRange.length > 14 ? e.date : dateRange}
+                      </span>
+                    </div>
+                    <div className={`w-1 h-6 rounded-full ${isClose ? "bg-warning/60" : "bg-primary/40"}`} />
+                    <div className="flex-1">
+                      <p className="text-[13px] font-medium">{e.name}</p>
+                      <p className="text-[11px] text-muted">
+                        {e.ticker}
+                        {daysUntil > 0 && <span className={`ml-2 ${isClose ? "text-warning font-medium" : ""}`}>あと{daysUntil}日</span>}
+                        {daysUntil <= 0 && <span className="ml-2 text-danger font-medium">決算済み</span>}
+                      </p>
+                    </div>
+                  </div>
+                );
+              }
+
+              // Show earnings months when exact date is unavailable
+              const nextMonth = e.earningsMonths.find((m) => m >= currentMonth) ?? e.earningsMonths[0];
+              const isThisMonth = nextMonth === currentMonth;
               return (
                 <div key={i} className="flex items-center gap-3 py-2.5 border-b border-border/50 last:border-0">
                   <div className="w-20 text-center">
-                    <span className={`text-[12px] font-mono font-medium ${isClose ? "text-warning" : "text-primary"}`}>
-                      {dateRange.length > 14 ? e.date : dateRange}
+                    <span className={`text-[12px] font-medium ${isThisMonth ? "text-warning" : "text-primary"}`}>
+                      {e.earningsMonths.map((m) => MONTH_NAMES[m - 1]).join(" / ")}
                     </span>
                   </div>
-                  <div className={`w-1 h-6 rounded-full ${isClose ? "bg-warning/60" : "bg-primary/40"}`} />
+                  <div className={`w-1 h-6 rounded-full ${isThisMonth ? "bg-warning/60" : "bg-primary/40"}`} />
                   <div className="flex-1">
                     <p className="text-[13px] font-medium">{e.name}</p>
                     <p className="text-[11px] text-muted">
-                      {e.ticker}
-                      {daysUntil > 0 && <span className={`ml-2 ${isClose ? "text-warning font-medium" : ""}`}>あと{daysUntil}日</span>}
-                      {daysUntil <= 0 && <span className="ml-2 text-danger font-medium">決算済み</span>}
+                      {e.ticker} / {e.fyeMonth}月決算
+                      {isThisMonth && <span className="ml-2 text-warning font-medium">今月決算</span>}
                     </p>
                   </div>
                 </div>
