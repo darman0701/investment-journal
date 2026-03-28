@@ -123,9 +123,9 @@ export async function GET() {
       price: Math.round(currentPrice * 100) / 100,
       change: Math.round(change * 100) / 100,
       changePercent: Math.round(changePercent * 100) / 100,
-      trailingPE: metrics.trailingPE ? Math.round(metrics.trailingPE * 100) / 100 : null,
-      forwardPE: metrics.forwardPE ? Math.round(metrics.forwardPE * 100) / 100 : null,
-      priceToBook: metrics.priceToBook ? Math.round(metrics.priceToBook * 100) / 100 : null,
+      trailingPE: Math.round((metrics.trailingPE ?? FALLBACK_PE.trailingPE) * 100) / 100,
+      forwardPE: Math.round((metrics.forwardPE ?? FALLBACK_PE.forwardPE) * 100) / 100,
+      priceToBook: Math.round((metrics.priceToBook ?? FALLBACK_PE.priceToBook) * 100) / 100,
       fiftyTwoWeekHigh: Math.round(fiftyTwoWeekHigh * 100) / 100,
       fiftyTwoWeekLow: Math.round(fiftyTwoWeekLow * 100) / 100,
     };
