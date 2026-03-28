@@ -9,12 +9,43 @@ interface SummaryMetrics {
   priceToBook: number | null;
 }
 
+async function fetchYahooCrumb(): Promise<{ crumb: string; cookie: string } | null> {
+  try {
+    // Step 1: Get auth cookie from Yahoo
+    const cookieRes = await fetch("https://fc.yahoo.com", {
+      headers: { "User-Agent": "Mozilla/5.0" },
+      redirect: "manual",
+    });
+    const setCookie = cookieRes.headers.get("set-cookie");
+    if (!setCookie) return null;
+
+    // Step 2: Get crumb using the cookie
+    const crumbRes = await fetch("https://query2.finance.yahoo.com/v1/test/getcrumb", {
+      headers: {
+        "User-Agent": "Mozilla/5.0",
+        Cookie: setCookie.split(";")[0],
+      },
+    });
+    if (!crumbRes.ok) return null;
+
+    const crumb = await crumbRes.text();
+    return { crumb, cookie: setCookie.split(";")[0] };
+  } catch {
+    return null;
+  }
+}
+
 async function fetchValuationMetrics(): Promise<SummaryMetrics> {
   try {
-    const url =
-      "https://query1.finance.yahoo.com/v10/finance/quoteSummary/%5EGSPC?modules=defaultKeyStatistics,summaryDetail";
+    const auth = await fetchYahooCrumb();
+    if (!auth) return { ...FALLBACK_PE };
+
+    const url = `https://query2.finance.yahoo.com/v10/finance/quoteSummary/SPY?modules=defaultKeyStatistics,summaryDetail&crumb=${encodeURIComponent(auth.crumb)}`;
     const res = await fetch(url, {
-      headers: { "User-Agent": "Mozilla/5.0" },
+      headers: {
+        "User-Agent": "Mozilla/5.0",
+        Cookie: auth.cookie,
+      },
       next: { revalidate: 3600 },
     });
 
@@ -25,9 +56,9 @@ async function fetchValuationMetrics(): Promise<SummaryMetrics> {
     const detail = json?.quoteSummary?.result?.[0]?.summaryDetail;
 
     return {
-      trailingPE: detail?.trailingPE?.raw ?? stats?.trailingPE?.raw ?? FALLBACK_PE.trailingPE,
-      forwardPE: detail?.forwardPE?.raw ?? stats?.forwardPE?.raw ?? FALLBACK_PE.forwardPE,
-      priceToBook: detail?.priceToBook?.raw ?? stats?.priceToBook?.raw ?? FALLBACK_PE.priceToBook,
+      trailingPE: detail?.trailingPE?.raw ?? stats?.trailingPE?.raw ?? null,
+      forwardPE: detail?.forwardPE?.raw ?? stats?.forwardPE?.raw ?? null,
+      priceToBook: detail?.priceToBook?.raw ?? stats?.priceToBook?.raw ?? null,
     };
   } catch {
     return { ...FALLBACK_PE };
