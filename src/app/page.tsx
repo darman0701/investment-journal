@@ -1,7 +1,7 @@
 "use client";
-import { useState, useEffect, lazy, Suspense } from "react";
-import { useLocalStorage } from "@/lib/useLocalStorage";
-import { Trade, WatchlistItem, InvestmentRule, Analysis, Rating, EntriesData } from "@/lib/types";
+import { useState, lazy, Suspense } from "react";
+import { useCloudStorage } from "@/lib/useCloudStorage";
+import { Trade, WatchlistItem, InvestmentRule, Analysis, Rating } from "@/lib/types";
 import TradeForm from "@/components/TradeForm";
 import TradeList from "@/components/TradeList";
 import Portfolio from "@/components/Portfolio";
@@ -38,13 +38,6 @@ const MARKET_TABS: { key: Tab; label: string }[] = [
   { key: "macro", label: "マクロ" },
 ];
 
-function mergeById<T extends { id: string }>(local: T[], json: T[]): T[] {
-  const map = new Map<string, T>();
-  for (const item of json) map.set(item.id, item);
-  for (const item of local) map.set(item.id, item);
-  return Array.from(map.values());
-}
-
 function Spinner() {
   return (
     <div className="flex items-center justify-center py-16">
@@ -54,29 +47,20 @@ function Spinner() {
 }
 
 export default function Home() {
-  const [trades, setTrades, tradesLoaded] = useLocalStorage<Trade[]>("ij-trades", []);
-  const [watchlist, setWatchlist] = useLocalStorage<WatchlistItem[]>("ij-watchlist", []);
-  const [rules, setRules] = useLocalStorage<InvestmentRule[]>("ij-rules", []);
-  const [analyses, setAnalyses] = useState<Analysis[]>([]);
+  const { data: cloudData, update: updateCloud, isLoaded } = useCloudStorage();
+  const trades = cloudData.trades as Trade[];
+  const watchlist = cloudData.watchlist as WatchlistItem[];
+  const rules = cloudData.rules as InvestmentRule[];
+  const analyses = cloudData.analyses as Analysis[];
   const [tab, setTab] = useState<Tab>("portfolio");
   const [showForm, setShowForm] = useState(false);
   const [editingTrade, setEditingTrade] = useState<Trade | undefined>();
-  const [jsonLoaded, setJsonLoaded] = useState(false);
 
   const isMarketTab = MARKET_TABS.some((t) => t.key === tab);
 
-  useEffect(() => {
-    fetch("/data/entries.json")
-      .then((res) => res.json())
-      .then((data: EntriesData) => {
-        if (data.analyses?.length) setAnalyses(data.analyses);
-        if (data.trades?.length) setTrades((prev) => mergeById(prev, data.trades));
-        if (data.watchlist?.length) setWatchlist((prev) => mergeById(prev, data.watchlist));
-        if (data.rules?.length) setRules((prev) => mergeById(prev, data.rules));
-        setJsonLoaded(true);
-      })
-      .catch(() => setJsonLoaded(true));
-  }, []);
+  const setTrades = (fn: (prev: Trade[]) => Trade[]) => updateCloud((d) => ({ ...d, trades: fn(d.trades as Trade[]) }));
+  const setWatchlist = (fn: (prev: WatchlistItem[]) => WatchlistItem[]) => updateCloud((d) => ({ ...d, watchlist: fn(d.watchlist as WatchlistItem[]) }));
+  const setRules = (fn: (prev: InvestmentRule[]) => InvestmentRule[]) => updateCloud((d) => ({ ...d, rules: fn(d.rules as InvestmentRule[]) }));
 
   const handleAddTrade = (trade: Trade) => {
     setTrades((prev) => {
@@ -98,7 +82,7 @@ export default function Home() {
 
   const handleEditTrade = (trade: Trade) => { setEditingTrade(trade); setShowForm(true); };
 
-  if (!tradesLoaded || !jsonLoaded) {
+  if (!isLoaded) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Spinner />
