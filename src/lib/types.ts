@@ -47,6 +47,7 @@ export interface Trade {
   tags: string[];
   emotion: Emotion | "";
   reason: string;
+  stopLoss?: number;
   horizon?: Horizon;
   rating?: Rating;
   reviewNote?: string;

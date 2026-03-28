@@ -127,6 +127,11 @@ export default function TradeList({ trades, onEdit, onDelete, onReview }: Props)
                     ))}
                   </div>
                 )}
+                {trade.type === "buy" && trade.stopLoss != null && (
+                  <p className="text-[11px] text-danger">
+                    損切りライン: {formatCurrency(trade.stopLoss)}（-{((1 - trade.stopLoss / trade.price) * 100).toFixed(1)}%）
+                  </p>
+                )}
                 {trade.emotion && (
                   <p className="text-[11px] text-muted">
                     心理: {EMOTION_LABELS[trade.emotion]}

@@ -19,6 +19,7 @@ export default function TradeForm({ onSubmit, onCancel, initial }: Props) {
     price: initial?.price?.toString() ?? "", quantity: initial?.quantity?.toString() ?? "",
     tags: initial?.tags ?? [] as string[], emotion: (initial?.emotion ?? "") as Emotion | "",
     reason: initial?.reason ?? "", customTag: "", horizon: (initial?.horizon ?? "") as Horizon | "",
+    stopLoss: initial?.stopLoss?.toString() ?? "",
   });
 
   const toggleTag = (tag: string) => setForm((f) => ({ ...f, tags: f.tags.includes(tag) ? f.tags.filter((t) => t !== tag) : [...f.tags, tag] }));
@@ -34,7 +35,8 @@ export default function TradeForm({ onSubmit, onCancel, initial }: Props) {
     onSubmit({
       id: initial?.id ?? generateId(), ticker: form.ticker, name: form.name,
       type: form.type, date: form.date, price: Number(form.price), quantity: Number(form.quantity),
-      tags: form.tags, emotion: form.emotion, reason: form.reason, horizon: form.horizon || undefined,
+      tags: form.tags, emotion: form.emotion, reason: form.reason,
+      stopLoss: form.stopLoss ? Number(form.stopLoss) : undefined, horizon: form.horizon || undefined,
       rating: initial?.rating, reviewNote: initial?.reviewNote, reviewDate: initial?.reviewDate,
       createdAt: initial?.createdAt ?? new Date().toISOString(),
     });
@@ -80,9 +82,17 @@ export default function TradeForm({ onSubmit, onCancel, initial }: Props) {
         </div>
       </div>
 
-      <div>
-        <label className="block text-[11px] text-muted mb-1">日付</label>
-        <input type="date" value={form.date} onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))} className="w-full" />
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="block text-[11px] text-muted mb-1">日付</label>
+          <input type="date" value={form.date} onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))} className="w-full" />
+        </div>
+        {form.type === "buy" && (
+          <div>
+            <label className="block text-[11px] text-muted mb-1">損切りライン</label>
+            <input type="number" value={form.stopLoss} onChange={(e) => setForm((f) => ({ ...f, stopLoss: e.target.value }))} placeholder="例: 2800" className="w-full" />
+          </div>
+        )}
       </div>
 
       <div>
