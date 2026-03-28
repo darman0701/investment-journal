@@ -9,6 +9,7 @@ import ReviewStats from "@/components/ReviewStats";
 import Watchlist from "@/components/Watchlist";
 import RuleManager from "@/components/RuleManager";
 import AnalysisList from "@/components/AnalysisList";
+import EventCalendar from "@/components/EventCalendar";
 
 // Lazy load heavy market components
 const ChartViewer = lazy(() => import("@/components/ChartViewer"));
@@ -17,7 +18,7 @@ const Valuation = lazy(() => import("@/components/Valuation"));
 const CpiAnalysis = lazy(() => import("@/components/CpiAnalysis"));
 const MacroMatrix = lazy(() => import("@/components/MacroMatrix"));
 
-type Tab = "portfolio" | "trades" | "analysis" | "review" | "watchlist" | "rules" | "chart" | "ranking" | "valuation" | "cpi" | "macro";
+type Tab = "portfolio" | "trades" | "analysis" | "review" | "watchlist" | "rules" | "calendar" | "chart" | "ranking" | "valuation" | "cpi" | "macro";
 
 const JOURNAL_TABS: { key: Tab; label: string }[] = [
   { key: "portfolio", label: "資産" },
@@ -26,6 +27,7 @@ const JOURNAL_TABS: { key: Tab; label: string }[] = [
   { key: "review", label: "振返り" },
   { key: "watchlist", label: "監視" },
   { key: "rules", label: "規律" },
+  { key: "calendar", label: "予定" },
 ];
 
 const MARKET_TABS: { key: Tab; label: string }[] = [
@@ -179,6 +181,13 @@ export default function Home() {
         {tab === "rules" && (
           <RuleManager rules={rules} onAdd={(rule) => setRules((prev) => [...prev, rule])} onToggle={(id) => setRules((prev) => prev.map((r) => (r.id === id ? { ...r, active: !r.active } : r)))} onDelete={(id) => setRules((prev) => prev.filter((r) => r.id !== id))} />
         )}
+        {tab === "calendar" && (() => {
+          const allTickers = [...new Set([...trades.map((t) => t.ticker), ...watchlist.map((w) => w.ticker)])];
+          const nameMap: Record<string, string> = {};
+          for (const t of trades) if (t.name) nameMap[t.ticker] = t.name;
+          for (const w of watchlist) if (w.name) nameMap[w.ticker] = w.name;
+          return <EventCalendar tickers={allTickers} tickerNames={nameMap} />;
+        })()}
 
         {/* Market Tabs */}
         {tab === "chart" && (

@@ -1,6 +1,6 @@
 "use client";
-import { useState } from "react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ComposedChart, Line } from "recharts";
+import { useState, useEffect } from "react";
+import { Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ComposedChart, Line } from "recharts";
 
 interface MonthlyData {
   month: string;
@@ -15,76 +15,12 @@ interface MonthlyData {
   other: number;
 }
 
-// CPI YoY data
-const CPI_YOY: MonthlyData[] = [
-  { month: "2025-03", headline: 2.39, core: 2.79, housing: 0.95, food: 0.22, energy: -0.15, medical: 0.21, transport: 0.18, education: 0.12, other: 0.15 },
-  { month: "2025-04", headline: 2.31, core: 2.83, housing: 0.91, food: 0.24, energy: -0.21, medical: 0.22, transport: 0.15, education: 0.11, other: 0.17 },
-  { month: "2025-05", headline: 2.33, core: 2.78, housing: 0.88, food: 0.21, energy: -0.12, medical: 0.20, transport: 0.19, education: 0.12, other: 0.13 },
-  { month: "2025-06", headline: 2.52, core: 2.87, housing: 0.92, food: 0.23, energy: 0.05, medical: 0.23, transport: 0.17, education: 0.10, other: 0.14 },
-  { month: "2025-07", headline: 2.65, core: 2.95, housing: 0.95, food: 0.25, energy: 0.12, medical: 0.19, transport: 0.21, education: 0.13, other: 0.12 },
-  { month: "2025-08", headline: 2.58, core: 2.91, housing: 0.93, food: 0.22, energy: 0.08, medical: 0.21, transport: 0.18, education: 0.11, other: 0.14 },
-  { month: "2025-09", headline: 2.41, core: 2.72, housing: 0.87, food: 0.20, energy: -0.05, medical: 0.22, transport: 0.16, education: 0.12, other: 0.15 },
-  { month: "2025-10", headline: 2.38, core: 2.68, housing: 0.85, food: 0.19, energy: -0.08, medical: 0.20, transport: 0.17, education: 0.13, other: 0.14 },
-  { month: "2025-11", headline: 2.49, core: 2.75, housing: 0.89, food: 0.21, energy: 0.02, medical: 0.21, transport: 0.19, education: 0.11, other: 0.13 },
-  { month: "2025-12", headline: 2.55, core: 2.82, housing: 0.91, food: 0.23, energy: 0.06, medical: 0.22, transport: 0.17, education: 0.12, other: 0.14 },
-  { month: "2026-01", headline: 2.48, core: 2.77, housing: 0.88, food: 0.22, energy: 0.01, medical: 0.21, transport: 0.18, education: 0.13, other: 0.13 },
-  { month: "2026-02", headline: 2.43, core: 2.47, housing: 0.90, food: 0.22, energy: 0.04, medical: 0.26, transport: 0.13, education: 0.22, other: 0.04 },
-];
-
-// CPI MoM data
-const CPI_MOM: MonthlyData[] = [
-  { month: "2025-03", headline: 0.22, core: 0.28, housing: 0.10, food: 0.02, energy: -0.01, medical: 0.03, transport: 0.02, education: 0.01, other: 0.02 },
-  { month: "2025-04", headline: 0.31, core: 0.35, housing: 0.12, food: 0.03, energy: 0.01, medical: 0.02, transport: 0.04, education: 0.01, other: 0.01 },
-  { month: "2025-05", headline: 0.18, core: 0.24, housing: 0.08, food: 0.02, energy: -0.02, medical: 0.03, transport: 0.01, education: 0.01, other: 0.02 },
-  { month: "2025-06", headline: 0.28, core: 0.30, housing: 0.11, food: 0.02, energy: 0.03, medical: 0.02, transport: 0.02, education: 0.01, other: 0.01 },
-  { month: "2025-07", headline: 0.35, core: 0.32, housing: 0.13, food: 0.03, energy: 0.05, medical: 0.02, transport: 0.03, education: 0.01, other: 0.01 },
-  { month: "2025-08", headline: 0.21, core: 0.25, housing: 0.09, food: 0.02, energy: -0.01, medical: 0.03, transport: 0.02, education: 0.01, other: 0.02 },
-  { month: "2025-09", headline: 0.17, core: 0.22, housing: 0.08, food: 0.02, energy: -0.03, medical: 0.02, transport: 0.01, education: 0.02, other: 0.01 },
-  { month: "2025-10", headline: 0.24, core: 0.27, housing: 0.10, food: 0.02, energy: 0.01, medical: 0.02, transport: 0.02, education: 0.01, other: 0.01 },
-  { month: "2025-11", headline: 0.30, core: 0.31, housing: 0.11, food: 0.03, energy: 0.03, medical: 0.03, transport: 0.02, education: 0.01, other: 0.01 },
-  { month: "2025-12", headline: 0.26, core: 0.29, housing: 0.10, food: 0.02, energy: 0.02, medical: 0.02, transport: 0.02, education: 0.01, other: 0.02 },
-  { month: "2026-01", headline: 0.32, core: 0.34, housing: 0.12, food: 0.03, energy: 0.03, medical: 0.03, transport: 0.02, education: 0.01, other: 0.01 },
-  { month: "2026-02", headline: 0.19, core: 0.23, housing: 0.09, food: 0.02, energy: -0.02, medical: 0.02, transport: 0.01, education: 0.02, other: 0.01 },
-];
-
-// PCE YoY data (PCE tends to run lower than CPI)
-const PCE_YOY: MonthlyData[] = [
-  { month: "2025-03", headline: 2.15, core: 2.55, housing: 0.72, food: 0.18, energy: -0.12, medical: 0.32, transport: 0.14, education: 0.10, other: 0.12 },
-  { month: "2025-04", headline: 2.08, core: 2.58, housing: 0.69, food: 0.19, energy: -0.18, medical: 0.33, transport: 0.12, education: 0.09, other: 0.14 },
-  { month: "2025-05", headline: 2.11, core: 2.54, housing: 0.67, food: 0.17, energy: -0.10, medical: 0.31, transport: 0.15, education: 0.10, other: 0.11 },
-  { month: "2025-06", headline: 2.28, core: 2.62, housing: 0.70, food: 0.19, energy: 0.04, medical: 0.34, transport: 0.14, education: 0.08, other: 0.11 },
-  { month: "2025-07", headline: 2.39, core: 2.69, housing: 0.73, food: 0.20, energy: 0.09, medical: 0.30, transport: 0.17, education: 0.11, other: 0.10 },
-  { month: "2025-08", headline: 2.33, core: 2.66, housing: 0.71, food: 0.18, energy: 0.06, medical: 0.32, transport: 0.15, education: 0.09, other: 0.12 },
-  { month: "2025-09", headline: 2.18, core: 2.49, housing: 0.66, food: 0.16, energy: -0.04, medical: 0.33, transport: 0.13, education: 0.10, other: 0.13 },
-  { month: "2025-10", headline: 2.14, core: 2.45, housing: 0.65, food: 0.15, energy: -0.06, medical: 0.31, transport: 0.14, education: 0.11, other: 0.12 },
-  { month: "2025-11", headline: 2.25, core: 2.51, housing: 0.68, food: 0.17, energy: 0.02, medical: 0.32, transport: 0.15, education: 0.09, other: 0.11 },
-  { month: "2025-12", headline: 2.30, core: 2.57, housing: 0.69, food: 0.19, energy: 0.05, medical: 0.33, transport: 0.14, education: 0.10, other: 0.12 },
-  { month: "2026-01", headline: 2.24, core: 2.53, housing: 0.67, food: 0.18, energy: 0.01, medical: 0.32, transport: 0.15, education: 0.11, other: 0.11 },
-  { month: "2026-02", headline: 2.19, core: 2.26, housing: 0.68, food: 0.18, energy: 0.03, medical: 0.35, transport: 0.10, education: 0.18, other: 0.03 },
-];
-
-// PCE MoM data
-const PCE_MOM: MonthlyData[] = [
-  { month: "2025-03", headline: 0.18, core: 0.22, housing: 0.08, food: 0.02, energy: -0.01, medical: 0.04, transport: 0.02, education: 0.01, other: 0.01 },
-  { month: "2025-04", headline: 0.25, core: 0.28, housing: 0.09, food: 0.02, energy: 0.01, medical: 0.03, transport: 0.03, education: 0.01, other: 0.01 },
-  { month: "2025-05", headline: 0.14, core: 0.19, housing: 0.06, food: 0.01, energy: -0.02, medical: 0.04, transport: 0.01, education: 0.01, other: 0.01 },
-  { month: "2025-06", headline: 0.23, core: 0.24, housing: 0.08, food: 0.02, energy: 0.02, medical: 0.03, transport: 0.02, education: 0.01, other: 0.01 },
-  { month: "2025-07", headline: 0.29, core: 0.26, housing: 0.10, food: 0.02, energy: 0.04, medical: 0.03, transport: 0.02, education: 0.01, other: 0.01 },
-  { month: "2025-08", headline: 0.17, core: 0.20, housing: 0.07, food: 0.02, energy: -0.01, medical: 0.04, transport: 0.02, education: 0.01, other: 0.01 },
-  { month: "2025-09", headline: 0.13, core: 0.18, housing: 0.06, food: 0.01, energy: -0.02, medical: 0.03, transport: 0.01, education: 0.01, other: 0.01 },
-  { month: "2025-10", headline: 0.20, core: 0.22, housing: 0.08, food: 0.02, energy: 0.01, medical: 0.03, transport: 0.01, education: 0.01, other: 0.01 },
-  { month: "2025-11", headline: 0.24, core: 0.25, housing: 0.09, food: 0.02, energy: 0.02, medical: 0.04, transport: 0.02, education: 0.01, other: 0.01 },
-  { month: "2025-12", headline: 0.21, core: 0.23, housing: 0.08, food: 0.02, energy: 0.01, medical: 0.03, transport: 0.02, education: 0.01, other: 0.01 },
-  { month: "2026-01", headline: 0.26, core: 0.28, housing: 0.09, food: 0.02, energy: 0.02, medical: 0.04, transport: 0.02, education: 0.01, other: 0.01 },
-  { month: "2026-02", headline: 0.15, core: 0.19, housing: 0.07, food: 0.01, energy: -0.01, medical: 0.03, transport: 0.01, education: 0.02, other: 0.01 },
-];
-
-const DATA_MAP: Record<string, MonthlyData[]> = {
-  "cpi-yoy": CPI_YOY,
-  "cpi-mom": CPI_MOM,
-  "pce-yoy": PCE_YOY,
-  "pce-mom": PCE_MOM,
-};
+interface ApiData {
+  cpiYoY: MonthlyData[];
+  cpiMoM: MonthlyData[];
+  pceYoY: MonthlyData[];
+  pceMoM: MonthlyData[];
+}
 
 const COMPONENT_COLORS: Record<string, string> = {
   housing: "#6366f1",
@@ -112,33 +48,109 @@ export default function CpiAnalysis() {
   const [indicator, setIndicator] = useState<"cpi" | "pce">("cpi");
   const [changeType, setChangeType] = useState<"yoy" | "mom">("yoy");
   const [tab, setTab] = useState<Tab>("breakdown");
+  const [data, setData] = useState<ApiData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchAll() {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const [cpiRes, pceRes] = await Promise.all([
+          fetch("/api/cpi"),
+          fetch("/api/pce"),
+        ]);
+
+        const cpiJson = cpiRes.ok ? await cpiRes.json() : null;
+        const pceJson = pceRes.ok ? await pceRes.json() : null;
+
+        if (cancelled) return;
+
+        if (!cpiJson && !pceJson) {
+          setError("データの取得に失敗しました");
+          return;
+        }
+
+        setData({
+          cpiYoY: cpiJson?.cpiYoY ?? [],
+          cpiMoM: cpiJson?.cpiMoM ?? [],
+          pceYoY: pceJson?.pceYoY ?? [],
+          pceMoM: pceJson?.pceMoM ?? [],
+        });
+      } catch {
+        if (!cancelled) setError("データの取得に失敗しました");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    fetchAll();
+    return () => { cancelled = true; };
+  }, []);
+
+  const dataMap: Record<string, MonthlyData[]> = data
+    ? { "cpi-yoy": data.cpiYoY, "cpi-mom": data.cpiMoM, "pce-yoy": data.pceYoY, "pce-mom": data.pceMoM }
+    : {};
 
   const dataKey = `${indicator}-${changeType}`;
-  const currentData = DATA_MAP[dataKey] || CPI_YOY;
+  const currentData = dataMap[dataKey] ?? [];
   const latest = currentData[currentData.length - 1];
   const prev = currentData.length >= 2 ? currentData[currentData.length - 2] : null;
 
-  const headlineChange = prev ? latest.headline - prev.headline : 0;
-  const coreChange = prev ? latest.core - prev.core : 0;
+  const headlineChange = prev && latest ? latest.headline - prev.headline : 0;
+  const coreChange = prev && latest ? latest.core - prev.core : 0;
 
   const indicatorLabel = indicator === "cpi" ? "CPI" : "PCE";
   const changeLabel = changeType === "yoy" ? "前年比" : "前月比";
-  const unit = changeType === "yoy" ? "%" : "%";
+  const unit = "%";
 
-  // Prepare breakdown bar data for latest month
-  const breakdownData = Object.entries(COMPONENT_LABELS)
-    .map(([key, label]) => ({
-      name: label,
-      key,
-      value: latest[key as keyof MonthlyData] as number,
-      fill: COMPONENT_COLORS[key],
-    }))
-    .sort((a, b) => b.value - a.value);
+  const breakdownData = latest
+    ? Object.entries(COMPONENT_LABELS)
+        .map(([key, label]) => ({
+          name: label,
+          key,
+          value: latest[key as keyof MonthlyData] as number,
+          fill: COMPONENT_COLORS[key],
+        }))
+        .sort((a, b) => b.value - a.value)
+    : [];
 
   const formatMonth = (m: string) => {
     const [y, mo] = m.split("-");
     return `${y}/${mo}`;
   };
+
+  if (loading) {
+    return (
+      <div className="space-y-5">
+        <div>
+          <h3 className="text-base font-semibold">CPI / PCE 内訳分析</h3>
+          <p className="text-[11px] text-muted">インフレ分解ダッシュボード — どの項目が物価を押し上げているか、コンポーネント別に可視化</p>
+        </div>
+        <div className="flex items-center justify-center h-40 text-muted text-sm">
+          BLS / BEA からデータ取得中...
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !latest) {
+    return (
+      <div className="space-y-5">
+        <div>
+          <h3 className="text-base font-semibold">CPI / PCE 内訳分析</h3>
+          <p className="text-[11px] text-muted">インフレ分解ダッシュボード — どの項目が物価を押し上げているか、コンポーネント別に可視化</p>
+        </div>
+        <div className="flex items-center justify-center h-40 text-danger text-sm">
+          {error ?? "データがありません"}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-5">
@@ -218,11 +230,11 @@ export default function CpiAnalysis() {
           <div className="bg-surface rounded-xl border border-border p-3" style={{ height: 340 }}>
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={currentData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e1e24" />
-                <XAxis dataKey="month" tickFormatter={formatMonth} tick={{ fontSize: 10, fill: "#71717a" }} />
-                <YAxis tick={{ fontSize: 10, fill: "#71717a" }} unit="pt" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e0e3ea" />
+                <XAxis dataKey="month" tickFormatter={formatMonth} tick={{ fontSize: 10, fill: "#7c8091" }} />
+                <YAxis tick={{ fontSize: 10, fill: "#7c8091" }} unit="pt" />
                 <Tooltip
-                  contentStyle={{ background: "#18181b", border: "1px solid #27272a", borderRadius: 8, fontSize: 11 }}
+                  contentStyle={{ background: "#ffffff", border: "1px solid #e0e3ea", borderRadius: 8, fontSize: 11 }}
                   labelFormatter={(m) => formatMonth(String(m))}
                 />
                 <Legend wrapperStyle={{ fontSize: 10 }} />
@@ -266,11 +278,11 @@ export default function CpiAnalysis() {
         <div className="bg-surface rounded-xl border border-border p-3" style={{ height: 340 }}>
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={currentData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1e1e24" />
-              <XAxis dataKey="month" tickFormatter={formatMonth} tick={{ fontSize: 10, fill: "#71717a" }} />
-              <YAxis tick={{ fontSize: 10, fill: "#71717a" }} unit="%" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#e0e3ea" />
+              <XAxis dataKey="month" tickFormatter={formatMonth} tick={{ fontSize: 10, fill: "#7c8091" }} />
+              <YAxis tick={{ fontSize: 10, fill: "#7c8091" }} unit="%" />
               <Tooltip
-                contentStyle={{ background: "#18181b", border: "1px solid #27272a", borderRadius: 8, fontSize: 11 }}
+                contentStyle={{ background: "#ffffff", border: "1px solid #e0e3ea", borderRadius: 8, fontSize: 11 }}
                 labelFormatter={(m) => formatMonth(String(m))}
               />
               <Legend wrapperStyle={{ fontSize: 10 }} />
@@ -306,7 +318,7 @@ export default function CpiAnalysis() {
       )}
 
       <p className="text-[10px] text-muted">
-        ※ データは手動更新。FRED APIキーを設定すれば自動取得に切替可能。
+        CPI: BLS API から自動取得（24時間キャッシュ） / PCE: FRED API から自動取得（FRED_API_KEY 未設定時はフォールバックデータ）
       </p>
     </div>
   );

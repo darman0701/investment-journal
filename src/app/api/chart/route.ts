@@ -48,6 +48,9 @@ export async function GET(req: NextRequest) {
   // Shorter cache for intraday data
   const isIntraday = ["5m", "15m", "60m"].includes(interval);
 
+  // JST offset for intraday charts (lightweight-charts has no timezone support)
+  const JST_OFFSET = isIntraday ? 9 * 3600 : 0;
+
   const results: Record<string, unknown> = {};
 
   await Promise.all(
@@ -73,7 +76,7 @@ export async function GET(req: NextRequest) {
         const splits = result.events?.splits || {};
 
         const candles = timestamps.map((t: number, i: number) => ({
-          time: t,
+          time: t + JST_OFFSET,
           open: quote.open?.[i] ?? null,
           high: quote.high?.[i] ?? null,
           low: quote.low?.[i] ?? null,

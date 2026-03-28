@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Trade, Emotion, EMOTION_LABELS } from "@/lib/types";
+import { Trade, Emotion, EMOTION_LABELS, Horizon, HORIZON_LABELS } from "@/lib/types";
 import { generateId } from "@/lib/utils";
 
 const DEFAULT_TAGS = ["成長株", "高配当", "バリュー", "短期", "IPO", "ETF", "INDEX"];
@@ -18,7 +18,7 @@ export default function TradeForm({ onSubmit, onCancel, initial }: Props) {
     date: initial?.date ?? new Date().toISOString().slice(0, 10),
     price: initial?.price?.toString() ?? "", quantity: initial?.quantity?.toString() ?? "",
     tags: initial?.tags ?? [] as string[], emotion: (initial?.emotion ?? "") as Emotion | "",
-    reason: initial?.reason ?? "", customTag: "",
+    reason: initial?.reason ?? "", customTag: "", horizon: (initial?.horizon ?? "") as Horizon | "",
   });
 
   const toggleTag = (tag: string) => setForm((f) => ({ ...f, tags: f.tags.includes(tag) ? f.tags.filter((t) => t !== tag) : [...f.tags, tag] }));
@@ -34,7 +34,7 @@ export default function TradeForm({ onSubmit, onCancel, initial }: Props) {
     onSubmit({
       id: initial?.id ?? generateId(), ticker: form.ticker, name: form.name,
       type: form.type, date: form.date, price: Number(form.price), quantity: Number(form.quantity),
-      tags: form.tags, emotion: form.emotion, reason: form.reason,
+      tags: form.tags, emotion: form.emotion, reason: form.reason, horizon: form.horizon || undefined,
       rating: initial?.rating, reviewNote: initial?.reviewNote, reviewDate: initial?.reviewDate,
       createdAt: initial?.createdAt ?? new Date().toISOString(),
     });
@@ -117,6 +117,19 @@ export default function TradeForm({ onSubmit, onCancel, initial }: Props) {
                 form.emotion === e ? "bg-warning/15 text-warning border border-warning/30" : "text-muted border border-border"
               }`}
             >{EMOTION_LABELS[e]}</button>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-[11px] text-muted mb-1.5">投資期間</label>
+        <div className="flex gap-1.5">
+          {(Object.keys(HORIZON_LABELS) as Horizon[]).map((h) => (
+            <button key={h} type="button" onClick={() => setForm((f) => ({ ...f, horizon: f.horizon === h ? "" : h }))}
+              className={`px-3 py-1.5 rounded-md text-[11px] transition ${
+                form.horizon === h ? "bg-accent/15 text-accent border border-accent/30" : "text-muted border border-border"
+              }`}
+            >{HORIZON_LABELS[h]}</button>
           ))}
         </div>
       </div>

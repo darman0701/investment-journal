@@ -1,5 +1,5 @@
 "use client";
-import { Trade, EMOTION_LABELS, RATING_LABELS, Rating } from "@/lib/types";
+import { Trade, EMOTION_LABELS, RATING_LABELS, Rating, Horizon, HORIZON_LABELS } from "@/lib/types";
 import { formatDate, formatCurrency } from "@/lib/utils";
 import { useState } from "react";
 
@@ -13,6 +13,7 @@ interface Props {
 export default function TradeList({ trades, onEdit, onDelete, onReview }: Props) {
   const [filterTag, setFilterTag] = useState("");
   const [filterType, setFilterType] = useState<"" | "buy" | "sell">("");
+  const [filterHorizon, setFilterHorizon] = useState<"" | Horizon>("");
   const [reviewingId, setReviewingId] = useState<string | null>(null);
   const [reviewRating, setReviewRating] = useState<Rating>("good");
   const [reviewNote, setReviewNote] = useState("");
@@ -22,6 +23,7 @@ export default function TradeList({ trades, onEdit, onDelete, onReview }: Props)
   const filtered = trades
     .filter((t) => !filterTag || t.tags.includes(filterTag))
     .filter((t) => !filterType || t.type === filterType)
+    .filter((t) => !filterHorizon || t.horizon === filterHorizon)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   const submitReview = (id: string) => {
@@ -51,6 +53,19 @@ export default function TradeList({ trades, onEdit, onDelete, onReview }: Props)
               }`}
             >
               {type === "" ? "ALL" : type === "buy" ? "BUY" : "SELL"}
+            </button>
+          ))}
+        </div>
+        <div className="flex gap-1">
+          {(["", "short", "long"] as const).map((h) => (
+            <button
+              key={h}
+              onClick={() => setFilterHorizon(h)}
+              className={`px-2.5 py-1.5 text-[11px] rounded-lg transition ${
+                filterHorizon === h ? "bg-card-hover text-foreground" : "text-muted hover:text-foreground"
+              }`}
+            >
+              {h === "" ? "期間" : HORIZON_LABELS[h]}
             </button>
           ))}
         </div>
@@ -87,6 +102,9 @@ export default function TradeList({ trades, onEdit, onDelete, onReview }: Props)
                     </div>
                     <div className="flex items-center gap-2 mt-0.5">
                       <span className="text-[11px] text-muted">{formatDate(trade.date)}</span>
+                      {trade.horizon && (
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded ${trade.horizon === "short" ? "bg-warning/10 text-warning" : "bg-primary/10 text-primary"}`}>{HORIZON_LABELS[trade.horizon]}</span>
+                      )}
                       {trade.rating && (
                         <span className="text-[10px] text-muted">{RATING_LABELS[trade.rating]}</span>
                       )}

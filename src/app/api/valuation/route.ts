@@ -1,9 +1,43 @@
 import { NextResponse } from "next/server";
 
+// Fallback values used when Yahoo quoteSummary is unavailable
+const FALLBACK_PE = { trailingPE: 28.1, forwardPE: 22.5, priceToBook: 5.18 };
+
+interface SummaryMetrics {
+  trailingPE: number | null;
+  forwardPE: number | null;
+  priceToBook: number | null;
+}
+
+async function fetchValuationMetrics(): Promise<SummaryMetrics> {
+  try {
+    const url =
+      "https://query1.finance.yahoo.com/v10/finance/quoteSummary/%5EGSPC?modules=defaultKeyStatistics,summaryDetail";
+    const res = await fetch(url, {
+      headers: { "User-Agent": "Mozilla/5.0" },
+      next: { revalidate: 3600 },
+    });
+
+    if (!res.ok) return { ...FALLBACK_PE };
+
+    const json = await res.json();
+    const stats = json?.quoteSummary?.result?.[0]?.defaultKeyStatistics;
+    const detail = json?.quoteSummary?.result?.[0]?.summaryDetail;
+
+    return {
+      trailingPE: detail?.trailingPE?.raw ?? stats?.trailingPE?.raw ?? FALLBACK_PE.trailingPE,
+      forwardPE: detail?.forwardPE?.raw ?? stats?.forwardPE?.raw ?? FALLBACK_PE.forwardPE,
+      priceToBook: detail?.priceToBook?.raw ?? stats?.priceToBook?.raw ?? FALLBACK_PE.priceToBook,
+    };
+  } catch {
+    return { ...FALLBACK_PE };
+  }
+}
+
 export async function GET() {
   try {
-    // Fetch both 10y history and 5d for current price change in parallel
-    const [histRes, dayRes] = await Promise.all([
+    // Fetch chart history, daily change, and valuation metrics in parallel
+    const [histRes, dayRes, metrics] = await Promise.all([
       fetch("https://query1.finance.yahoo.com/v8/finance/chart/%5EGSPC?range=10y&interval=1mo", {
         headers: { "User-Agent": "Mozilla/5.0" },
         next: { revalidate: 3600 },
@@ -12,6 +46,7 @@ export async function GET() {
         headers: { "User-Agent": "Mozilla/5.0" },
         next: { revalidate: 300 },
       }),
+      fetchValuationMetrics(),
     ]);
 
     if (!histRes.ok) {
@@ -53,16 +88,13 @@ export async function GET() {
       if (lows[i] && lows[i] < fiftyTwoWeekLow) fiftyTwoWeekLow = lows[i];
     }
 
-    // S&P500 historical PER estimates (approximate using earnings yield)
-    // We use known S&P500 earnings data points for rough PER calculation
     const sp500Data = {
       price: Math.round(currentPrice * 100) / 100,
       change: Math.round(change * 100) / 100,
       changePercent: Math.round(changePercent * 100) / 100,
-      // These are well-known current approximate values
-      trailingPE: 28.1,
-      forwardPE: 22.5,
-      priceToBook: 5.18,
+      trailingPE: metrics.trailingPE ? Math.round(metrics.trailingPE * 100) / 100 : null,
+      forwardPE: metrics.forwardPE ? Math.round(metrics.forwardPE * 100) / 100 : null,
+      priceToBook: metrics.priceToBook ? Math.round(metrics.priceToBook * 100) / 100 : null,
       fiftyTwoWeekHigh: Math.round(fiftyTwoWeekHigh * 100) / 100,
       fiftyTwoWeekLow: Math.round(fiftyTwoWeekLow * 100) / 100,
     };

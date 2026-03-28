@@ -29,6 +29,13 @@ export const RATING_LABELS: Record<Rating, string> = {
   poor: "×",
 };
 
+export type Horizon = "short" | "long";
+
+export const HORIZON_LABELS: Record<Horizon, string> = {
+  short: "短期",
+  long: "長期",
+};
+
 export interface Trade {
   id: string;
   ticker: string;
@@ -40,6 +47,7 @@ export interface Trade {
   tags: string[];
   emotion: Emotion | "";
   reason: string;
+  horizon?: Horizon;
   rating?: Rating;
   reviewNote?: string;
   reviewDate?: string;

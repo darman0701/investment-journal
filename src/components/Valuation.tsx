@@ -89,11 +89,11 @@ export default function Valuation() {
     const chart = createChart(container, {
       width: container.clientWidth,
       height: 300,
-      layout: { background: { color: "#09090b" }, textColor: "#71717a", fontSize: 11 },
-      grid: { vertLines: { color: "#1e1e24" }, horzLines: { color: "#1e1e24" } },
+      layout: { background: { color: "#f5f6fa" }, textColor: "#7c8091", fontSize: 11 },
+      grid: { vertLines: { color: "#e0e3ea" }, horzLines: { color: "#e0e3ea" } },
       crosshair: { mode: 0 },
-      rightPriceScale: { borderColor: "#27272a" },
-      timeScale: { borderColor: "#27272a" },
+      rightPriceScale: { borderColor: "#e0e3ea" },
+      timeScale: { borderColor: "#e0e3ea" },
     });
     chartRef.current = chart;
 

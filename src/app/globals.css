@@ -1,20 +1,20 @@
 @import "tailwindcss";
 
 :root {
-  --background: #09090b;
-  --foreground: #fafafa;
-  --card: #18181b;
-  --card-hover: #27272a;
-  --border: #27272a;
+  --background: #f5f6fa;
+  --foreground: #1a1d26;
+  --card: #ffffff;
+  --card-hover: #f0f1f5;
+  --border: #e0e3ea;
   --primary: #6366f1;
   --primary-hover: #4f46e5;
   --success: #10b981;
-  --danger: #f43f5e;
+  --danger: #ef4444;
   --warning: #f59e0b;
-  --muted: #71717a;
-  --input-bg: #18181b;
-  --accent: #a78bfa;
-  --surface: #131316;
+  --muted: #7c8091;
+  --input-bg: #ffffff;
+  --accent: #818cf8;
+  --surface: #eef0f5;
 }
 
 @theme inline {
@@ -66,6 +66,7 @@ select:focus {
 
 select option {
   background: var(--card);
+  color: var(--foreground);
 }
 
 /* Scrollbar */

@@ -114,18 +114,18 @@ export default function ChartViewer() {
       width: container.clientWidth,
       height: 420,
       layout: {
-        background: { color: "#09090b" },
-        textColor: "#71717a",
+        background: { color: "#f5f6fa" },
+        textColor: "#7c8091",
         fontSize: 11,
       },
       grid: {
-        vertLines: { color: "#1e1e24" },
-        horzLines: { color: "#1e1e24" },
+        vertLines: { color: "#e0e3ea" },
+        horzLines: { color: "#e0e3ea" },
       },
       crosshair: { mode: 0 },
-      rightPriceScale: { borderColor: "#27272a" },
+      rightPriceScale: { borderColor: "#e0e3ea" },
       timeScale: {
-        borderColor: "#27272a",
+        borderColor: "#e0e3ea",
         timeVisible: ["5m", "15m", "60m"].includes(currentTimeframe.interval),
       },
     });
