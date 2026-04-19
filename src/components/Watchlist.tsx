@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { WatchlistItem } from "@/lib/types";
 import { generateId, formatCurrency } from "@/lib/utils";
+import { openTicker } from "@/lib/useTickerDetail";
 
 interface Props {
   items: WatchlistItem[];
@@ -161,7 +162,12 @@ export default function Watchlist({ items, onAdd, onDelete, onUpdate }: Props) {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-[13px] font-medium">{item.name || item.ticker}</span>
+                    <button
+                      onClick={() => openTicker(item.ticker)}
+                      className="text-[13px] font-medium hover:text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary/40 rounded-sm"
+                    >
+                      {item.name || item.ticker}
+                    </button>
                     <span className="text-[11px] text-muted font-mono">{item.ticker}</span>
                   </div>
                   {item.targetPrice && (

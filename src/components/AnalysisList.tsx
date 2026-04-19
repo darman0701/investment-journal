@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Analysis } from "@/lib/types";
 import { formatDate } from "@/lib/utils";
 import { getExternalLinks } from "@/lib/edinetLinks";
+import { openTicker } from "@/lib/useTickerDetail";
 
 interface Props {
   analyses: Analysis[];
@@ -161,8 +162,24 @@ export default function AnalysisList({ analyses }: Props) {
               >
                 <div className="flex items-center justify-between mb-1">
                   <div className="flex items-center gap-2.5">
-                    <span className="text-[11px] font-mono font-semibold text-primary">{a.ticker}</span>
-                    <span className="text-[13px] font-medium">{a.name}</span>
+                    <span
+                      role="button"
+                      tabIndex={0}
+                      onClick={(e) => { e.stopPropagation(); openTicker(a.ticker); }}
+                      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); openTicker(a.ticker); } }}
+                      className="text-[11px] font-mono font-semibold text-primary hover:underline cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/40 rounded-sm"
+                    >
+                      {a.ticker}
+                    </span>
+                    <span
+                      role="button"
+                      tabIndex={0}
+                      onClick={(e) => { e.stopPropagation(); openTicker(a.ticker); }}
+                      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); openTicker(a.ticker); } }}
+                      className="text-[13px] font-medium hover:text-primary transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/40 rounded-sm"
+                    >
+                      {a.name}
+                    </span>
                   </div>
                   <span className="text-[11px] text-muted tabular-nums">{formatDate(a.date)}</span>
                 </div>

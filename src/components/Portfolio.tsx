@@ -1,11 +1,17 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
-import { Trade } from "@/lib/types";
+import { Trade, WatchlistItem } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils";
 import { getExternalLinks } from "@/lib/edinetLinks";
+import { openTicker } from "@/lib/useTickerDetail";
 import PortfolioAnalytics from "./PortfolioAnalytics";
+import Dashboard from "./Dashboard";
 
-interface Props { trades: Trade[]; }
+interface Props {
+  trades: Trade[];
+  watchlist?: WatchlistItem[];
+  onNavigate?: (tab: string) => void;
+}
 
 interface Position {
   ticker: string; name: string; avgPrice: number;
@@ -16,7 +22,7 @@ interface PriceData { price: number; change: number; changePercent: number; }
 
 type View = "list" | "analytics";
 
-export default function Portfolio({ trades }: Props) {
+export default function Portfolio({ trades, watchlist = [], onNavigate }: Props) {
   const [prices, setPrices] = useState<Record<string, PriceData | null>>({});
   const [loading, setLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState("");
@@ -58,7 +64,23 @@ export default function Portfolio({ trades }: Props) {
   useEffect(() => { fetchPrices(); }, []);
 
   if (active.length === 0) {
-    return <div className="text-center py-20"><p className="text-sm text-muted">保有銘柄なし</p></div>;
+    return (
+      <div>
+        {onNavigate && <Dashboard trades={trades} watchlist={watchlist} onNavigate={onNavigate} />}
+        <div className="text-center py-16 rounded-2xl border border-dashed border-border">
+          <p className="text-2xl mb-2" aria-hidden>📊</p>
+          <p className="text-sm text-muted">保有銘柄なし</p>
+          {onNavigate && (
+            <button
+              onClick={() => onNavigate("trades")}
+              className="mt-3 text-[12px] text-primary hover:underline"
+            >
+              取引を記録する
+            </button>
+          )}
+        </div>
+      </div>
+    );
   }
 
   const hasPrices = Object.keys(prices).length > 0;
@@ -68,6 +90,8 @@ export default function Portfolio({ trades }: Props) {
 
   return (
     <div>
+      {onNavigate && <Dashboard trades={trades} watchlist={watchlist} onNavigate={onNavigate} />}
+
       {/* Header numbers */}
       <div className="mb-6">
         {hasPrices ? (
@@ -132,10 +156,13 @@ export default function Portfolio({ trades }: Props) {
                       >
                         <span className="text-[10px] font-mono font-bold text-muted">{pos.ticker.slice(0, 3)}</span>
                       </button>
-                      <div>
+                      <button
+                        onClick={() => openTicker(pos.ticker)}
+                        className="text-left transition-all duration-200 active:scale-[0.98] hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/40 rounded-md -mx-1 px-1"
+                      >
                         <p className="text-[13px] font-medium">{pos.name}</p>
                         <p className="text-[11px] text-muted font-mono">{pos.ticker} · {pos.totalQuantity}株</p>
-                      </div>
+                      </button>
                     </div>
                     <div className="text-right">
                       {pd ? (

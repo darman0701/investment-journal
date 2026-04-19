@@ -50,8 +50,21 @@ function normalizeData(candles: Candle[]): { time: Time; value: number }[] {
 
 const LINE_COLORS = ["#6366f1", "#f43f5e", "#10b981", "#f59e0b", "#a78bfa"];
 
-export default function ChartViewer() {
-  const [selected, setSelected] = useState<SelectedTicker[]>([{ symbol: "^GSPC", name: "S&P500" }]);
+interface ChartViewerProps {
+  initialTicker?: { ticker: string; name?: string };
+}
+
+function resolveInitialSelected(initial?: { ticker: string; name?: string }): SelectedTicker[] {
+  if (!initial?.ticker) return [{ symbol: "^GSPC", name: "S&P500" }];
+  const t = initial.ticker.trim();
+  // Japanese stock codes: 4 digits, optional letter suffix (e.g. 513A)
+  const isJP = /^\d{4}[A-Z]?$/.test(t);
+  const symbol = isJP ? `${t}.T` : t.toUpperCase();
+  return [{ symbol, name: initial.name || t, suffix: isJP ? "T" : undefined }];
+}
+
+export default function ChartViewer({ initialTicker }: ChartViewerProps = {}) {
+  const [selected, setSelected] = useState<SelectedTicker[]>(() => resolveInitialSelected(initialTicker));
   const [timeframeIdx, setTimeframeIdx] = useState(3); // 日足 default
   const [range, setRange] = useState("6mo");
   const [mode, setMode] = useState<DisplayMode>("individual");

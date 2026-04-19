@@ -1,6 +1,7 @@
 "use client";
 import { Trade, EMOTION_LABELS, RATING_LABELS, Rating, Horizon, HORIZON_LABELS } from "@/lib/types";
 import { formatDate, formatCurrency } from "@/lib/utils";
+import { openTicker } from "@/lib/useTickerDetail";
 import { useState } from "react";
 
 interface Props {
@@ -34,8 +35,10 @@ export default function TradeList({ trades, onEdit, onDelete, onReview }: Props)
 
   if (trades.length === 0) {
     return (
-      <div className="text-center py-20">
+      <div className="text-center py-16 rounded-2xl border border-dashed border-border">
+        <p className="text-2xl mb-2" aria-hidden>📝</p>
         <p className="text-sm text-muted">取引記録がありません</p>
+        <p className="text-[11px] text-muted/70 mt-1">上の「取引を記録」から追加してください</p>
       </div>
     );
   }
@@ -97,7 +100,15 @@ export default function TradeList({ trades, onEdit, onDelete, onReview }: Props)
                   <span className={`w-1 h-8 rounded-full ${trade.type === "buy" ? "bg-success" : "bg-danger"}`} />
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-[13px] font-medium">{trade.name || trade.ticker}</span>
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        onClick={(e) => { e.stopPropagation(); openTicker(trade.ticker); }}
+                        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); openTicker(trade.ticker); } }}
+                        className="text-[13px] font-medium hover:text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary/40 rounded-sm cursor-pointer"
+                      >
+                        {trade.name || trade.ticker}
+                      </span>
                       <span className="text-[11px] text-muted font-mono">{trade.ticker}</span>
                     </div>
                     <div className="flex items-center gap-2 mt-0.5">
