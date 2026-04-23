@@ -1,3 +1,7 @@
+# Claude Design handoff bundle (reference only)
+.claude-design/
+# One-off scripts
+scripts/
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies

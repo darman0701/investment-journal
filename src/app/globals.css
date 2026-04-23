@@ -1,77 +1,216 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
 
+/* Design tokens — ported from .claude-design/project/styles.css */
 :root {
-  --background: #f5f6fa;
-  --foreground: #1a1d26;
-  --card: #ffffff;
-  --card-hover: #f0f1f5;
-  --border: #e0e3ea;
-  --primary: #6366f1;
-  --primary-hover: #4f46e5;
-  --success: #10b981;
-  --danger: #ef4444;
-  --warning: #f59e0b;
-  --muted: #7c8091;
-  --input-bg: #ffffff;
-  --accent: #818cf8;
-  --surface: #eef0f5;
+  --bg: #F5F0E8;
+  --card: #FFFFFF;
+  --primary: #C15F3C;
+  --primary-hover: #A04E2F;
+  --primary-soft: #F4E4DC;
+  --text: #2D2A26;
+  --text-muted: #8B8680;
+  --text-faint: #B5AFA3;
+  --border: #E8E2D6;
+  --border-soft: #F0EBE0;
+  --success: #22C55E;
+  --success-soft: #DCF7E5;
+  --danger: #DC2626;
+  --danger-soft: #FCE4E4;
+  --warning: #D97706;
+  --warning-soft: #FEF3C7;
+  --chip: #EFE9DD;
+  --chip-active: #2D2A26;
+  --radius-card: 16px;
+  --radius-btn: 10px;
+  --shadow-card: 0 1px 3px rgba(45, 42, 38, 0.06);
+  --shadow-pop: 0 10px 30px rgba(45, 42, 38, 0.15), 0 2px 6px rgba(45, 42, 38, 0.08);
+  --serif: 'Noto Serif JP', 'Source Serif Pro', 'Georgia', serif;
+  --sans: 'Inter', 'Noto Sans JP', -apple-system, 'SF Pro', sans-serif;
+  --mono: 'JetBrains Mono', 'SF Mono', ui-monospace, monospace;
+
+  /* Back-compat aliases used by older components still in the tree */
+  --background: var(--bg);
+  --foreground: var(--text);
+  --card-hover: var(--border-soft);
+  --muted: var(--text-muted);
+  --input-bg: var(--card);
+  --accent: var(--primary);
+  --surface: var(--border-soft);
+}
+
+.dark {
+  --bg: #1A1815;
+  --card: #26221E;
+  --primary: #D97A5A;
+  --primary-hover: #E88B6B;
+  --primary-soft: #3A2720;
+  --text: #F0EBE0;
+  --text-muted: #A5A097;
+  --text-faint: #6B6862;
+  --border: #35302A;
+  --border-soft: #2E2923;
+  --chip: #2E2923;
+  --chip-active: #F0EBE0;
+  --success: #4ADE80;
+  --success-soft: #1F3A26;
+  --danger: #F87171;
+  --danger-soft: #3A201F;
+  --warning: #FBBF24;
+  --warning-soft: #3A2E15;
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.3);
+
+  --background: var(--bg);
+  --foreground: var(--text);
+  --card-hover: var(--border-soft);
+  --muted: var(--text-muted);
+  --input-bg: var(--card);
+  --accent: var(--primary);
+  --surface: var(--border-soft);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--bg);
+  --color-foreground: var(--text);
   --color-card: var(--card);
-  --color-card-hover: var(--card-hover);
+  --color-card-hover: var(--border-soft);
   --color-border: var(--border);
+  --color-border-soft: var(--border-soft);
   --color-primary: var(--primary);
   --color-primary-hover: var(--primary-hover);
+  --color-primary-soft: var(--primary-soft);
   --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
   --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
   --color-warning: var(--warning);
-  --color-muted: var(--muted);
-  --color-input-bg: var(--input-bg);
-  --color-accent: var(--accent);
-  --color-surface: var(--surface);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-warning-soft: var(--warning-soft);
+  --color-muted: var(--text-muted);
+  --color-text-faint: var(--text-faint);
+  --color-input-bg: var(--card);
+  --color-accent: var(--primary);
+  --color-surface: var(--border-soft);
+  --color-chip: var(--chip);
+  --font-sans: var(--sans);
+  --font-serif: var(--serif);
+  --font-mono: var(--mono);
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--text);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: var(--sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'palt';
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+.serif {
+  font-family: var(--serif);
+  font-feature-settings: 'palt';
+}
+.mono {
+  font-family: var(--mono);
+}
+
+.card {
+  background: var(--card);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border-soft);
+}
+
+.tap {
+  transition: transform 200ms ease, background 150ms ease, box-shadow 150ms ease;
+}
+.tap:active {
+  transform: scale(0.98);
+}
+
+@keyframes sheetIn {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes popIn {
+  from {
+    transform: scale(0.96);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.anim-sheet-in {
+  animation: sheetIn 280ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.anim-fade-in {
+  animation: fadeIn 200ms ease-out;
+}
+.anim-pop-in {
+  animation: popIn 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
 }
 
 input,
 textarea,
 select {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--foreground);
-  border-radius: 0.75rem;
-  padding: 0.625rem 0.875rem;
-  font-size: 0.8125rem;
+  background: transparent;
+  color: var(--text);
+  font-family: inherit;
   outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
+}
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-faint);
 }
 
-input:focus,
-textarea:focus,
-select:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+/* Scroll shadow on sticky header */
+.app-header.scrolled {
+  box-shadow: 0 4px 14px -8px rgba(45, 42, 38, 0.15);
+  border-bottom-color: var(--border);
 }
 
-select option {
-  background: var(--card);
-  color: var(--foreground);
-}
-
-/* Scrollbar */
 ::-webkit-scrollbar {
   width: 3px;
+  height: 3px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
