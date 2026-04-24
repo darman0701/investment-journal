@@ -175,7 +175,7 @@ export default function WatchScreen({ items, onOpenStock, onAdd, onDelete }: Pro
           まだ監視銘柄はありません
         </div>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <div className="grid gap-[10px] grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
           {withProgress.map((w) => (
             <div
               key={w.id}

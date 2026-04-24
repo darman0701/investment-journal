@@ -208,6 +208,116 @@ textarea::placeholder {
   border-bottom-color: var(--border);
 }
 
+/* Root app layout: mobile-first 480px centered column, desktop flex row
+   with sidebar + main content. */
+.app-root {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: var(--bg);
+}
+@media (min-width: 768px) {
+  .app-root {
+    max-width: none;
+    margin: 0;
+    flex-direction: row;
+    align-items: stretch;
+  }
+}
+
+.app-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+@media (min-width: 768px) {
+  .app-main {
+    min-width: 0;
+  }
+}
+
+.app-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+}
+@media (min-width: 768px) {
+  .app-content {
+    max-width: 1280px;
+    margin: 0 auto;
+    min-height: auto;
+  }
+}
+
+/* FAB positioning: mobile default keeps it above bottom nav.
+   On desktop (md+), sit at bottom-right with no bottom-nav offset. */
+.fab-btn {
+  right: max(18px, calc((100vw - 480px) / 2 + 18px));
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 84px);
+}
+@media (min-width: 768px) {
+  .fab-btn {
+    right: 32px;
+    bottom: 32px;
+  }
+}
+
+/* Modal sheet/dialog responsive wrapper.
+   Mobile: full-screen sheet with slide-up.
+   Desktop (md+): centered dialog with backdrop + pop-in. */
+.modal-root {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  animation: sheetIn 280ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@media (min-width: 768px) {
+  .modal-root {
+    background: rgba(45, 42, 38, 0.45);
+    backdrop-filter: blur(6px) saturate(140%);
+    -webkit-backdrop-filter: blur(6px) saturate(140%);
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    animation: fadeIn 200ms ease-out;
+  }
+  .modal-panel {
+    background: var(--bg);
+    border-radius: 20px;
+    box-shadow: var(--shadow-pop);
+    width: 100%;
+    max-width: 640px;
+    max-height: min(860px, calc(100vh - 48px));
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--border-soft);
+    animation: popIn 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .modal-panel-lg {
+    max-width: 880px;
+  }
+}
+/* Mobile: panel is just a pass-through filling the root */
+@media (max-width: 767px) {
+  .modal-panel {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    background: var(--bg);
+  }
+}
+
 ::-webkit-scrollbar {
   width: 3px;
   height: 3px;

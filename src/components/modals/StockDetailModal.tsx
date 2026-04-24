@@ -124,16 +124,10 @@ export default function StockDetailModal({
 
   return (
     <div
-      className="anim-sheet-in"
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 100,
-        background: "var(--bg)",
-        display: "flex",
-        flexDirection: "column",
-      }}
+      className="modal-root"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
     >
+      <div className="modal-panel modal-panel-lg" onClick={(e) => e.stopPropagation()}>
       <div
         style={{
           padding: "calc(env(safe-area-inset-top, 0px) + 8px) 16px 12px",
@@ -449,6 +443,7 @@ export default function StockDetailModal({
             </div>
           </DetailSection>
         )}
+      </div>
       </div>
     </div>
   );

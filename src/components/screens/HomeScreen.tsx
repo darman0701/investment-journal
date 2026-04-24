@@ -114,7 +114,7 @@ export default function HomeScreen({
       </StickyHeader>
 
       <div
-        className="scrollbar-none"
+        className="scrollbar-none home-scroll"
         onScroll={onScroll}
         style={{ flex: 1, overflowY: "auto", padding: "8px 16px 140px" }}
       >
@@ -427,6 +427,7 @@ export default function HomeScreen({
           </Section>
         )}
 
+        <div className="xl:grid xl:grid-cols-2 xl:gap-3">
         {/* Watchlist preview (as a "decision" list - with targets) */}
         {watchlist.length > 0 && (
           <Section
@@ -580,6 +581,7 @@ export default function HomeScreen({
             </div>
           </Section>
         )}
+        </div>
 
         {positions.length === 0 &&
           watchlist.length === 0 &&

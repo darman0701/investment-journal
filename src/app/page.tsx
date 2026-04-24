@@ -8,7 +8,7 @@ import {
   InvestmentRule,
   Analysis,
 } from "@/lib/types";
-import { BottomNav, FAB, SubTabs, type MainTab } from "@/components/ui/Shell";
+import { BottomNav, FAB, Sidebar, SubTabs, type MainTab } from "@/components/ui/Shell";
 import HomeScreen from "@/components/screens/HomeScreen";
 import TradesScreen from "@/components/screens/journal/TradesScreen";
 import AnalysisScreen from "@/components/screens/journal/AnalysisScreen";
@@ -159,6 +159,7 @@ export default function Home() {
           tabs={JOURNAL_SUBS}
           active={journalSub}
           onChange={setJournalSub}
+          hideOnDesktop
         />
         {screens[journalSub]}
       </>
@@ -173,33 +174,43 @@ export default function Home() {
     };
     body = (
       <>
-        <SubTabs tabs={MARKET_SUBS} active={marketSub} onChange={setMarketSub} />
+        <SubTabs
+          tabs={MARKET_SUBS}
+          active={marketSub}
+          onChange={setMarketSub}
+          hideOnDesktop
+        />
         {screens[marketSub]}
       </>
     );
   }
 
+  const sidebarSubs =
+    tab === "journal"
+      ? JOURNAL_SUBS
+      : tab === "market"
+      ? MARKET_SUBS
+      : undefined;
+  const sidebarActiveSub =
+    tab === "journal" ? journalSub : tab === "market" ? marketSub : undefined;
+  const sidebarOnSubChange =
+    tab === "journal"
+      ? (s: string) => setJournalSub(s as JournalSub)
+      : tab === "market"
+      ? (s: string) => setMarketSub(s as MarketSub)
+      : undefined;
+
   return (
-    <div
-      style={{
-        maxWidth: 480,
-        margin: "0 auto",
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        position: "relative",
-        background: "var(--bg)",
-      }}
-    >
-      <div
-        style={{
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-          minHeight: "100vh",
-        }}
-      >
-        {body}
+    <div className="app-root">
+      <Sidebar
+        tab={tab}
+        onTab={setTab}
+        subTabs={sidebarSubs}
+        activeSub={sidebarActiveSub}
+        onSubChange={sidebarOnSubChange}
+      />
+      <div className="app-main">
+        <div className="app-content">{body}</div>
       </div>
       <FAB onClick={() => setShowTradeForm(true)} />
       <BottomNav tab={tab} onTab={setTab} />

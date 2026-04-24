@@ -98,17 +98,8 @@ export default function TradeFormModal({ onClose, onSubmit, initial }: Props) {
   };
 
   return (
-    <div
-      className="anim-sheet-in"
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 100,
-        background: "var(--bg)",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
+    <div className="modal-root" onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="modal-panel" onClick={(e) => e.stopPropagation()}>
       <div
         style={{
           padding: "calc(env(safe-area-inset-top, 0px) + 8px) 16px 14px",
@@ -522,6 +513,7 @@ export default function TradeFormModal({ onClose, onSubmit, initial }: Props) {
             ))}
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

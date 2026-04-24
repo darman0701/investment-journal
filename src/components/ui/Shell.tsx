@@ -4,6 +4,12 @@ import { BookIcon, ChartIcon, HomeIcon, MoonIcon, PlusIcon, SunIcon } from "./ic
 
 export type MainTab = "home" | "journal" | "market";
 
+const MAIN_TABS: { id: MainTab; label: string; Ic: (p: { size?: number }) => React.JSX.Element }[] = [
+  { id: "home", label: "ホーム", Ic: HomeIcon },
+  { id: "journal", label: "記録", Ic: BookIcon },
+  { id: "market", label: "マーケット", Ic: ChartIcon },
+];
+
 export function BottomNav({
   tab,
   onTab,
@@ -11,14 +17,9 @@ export function BottomNav({
   tab: MainTab;
   onTab: (t: MainTab) => void;
 }) {
-  const tabs: { id: MainTab; label: string; Ic: (p: { size?: number }) => React.JSX.Element }[] = [
-    { id: "home", label: "ホーム", Ic: HomeIcon },
-    { id: "journal", label: "記録", Ic: BookIcon },
-    { id: "market", label: "マーケット", Ic: ChartIcon },
-  ];
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 mx-auto flex max-w-[480px] justify-around border-t pt-2"
+      className="fixed inset-x-0 bottom-0 z-40 mx-auto flex max-w-[480px] justify-around border-t pt-2 md:hidden"
       style={{
         background: "color-mix(in srgb, var(--bg) 85%, transparent)",
         backdropFilter: "blur(20px) saturate(180%)",
@@ -28,7 +29,7 @@ export function BottomNav({
       }}
       aria-label="メインナビゲーション"
     >
-      {tabs.map(({ id, label, Ic }) => {
+      {MAIN_TABS.map(({ id, label, Ic }) => {
         const active = tab === id;
         return (
           <button
@@ -56,18 +57,142 @@ export function BottomNav({
   );
 }
 
+// Desktop sidebar nav, visible at md+. Mirrors BottomNav but as a vertical rail
+// with optional nested sub-tabs under the active section.
+export function Sidebar({
+  tab,
+  onTab,
+  subTabs,
+  activeSub,
+  onSubChange,
+}: {
+  tab: MainTab;
+  onTab: (t: MainTab) => void;
+  subTabs?: readonly string[];
+  activeSub?: string;
+  onSubChange?: (s: string) => void;
+}) {
+  return (
+    <aside
+      className="hidden md:flex md:flex-col shrink-0 border-r"
+      style={{
+        width: 248,
+        background: "var(--bg)",
+        borderColor: "var(--border-soft)",
+        position: "sticky",
+        top: 0,
+        height: "100vh",
+      }}
+      aria-label="メインナビゲーション"
+    >
+      <div
+        className="serif"
+        style={{
+          padding: "22px 24px 20px",
+          fontSize: 24,
+          fontWeight: 600,
+          letterSpacing: 0.5,
+        }}
+      >
+        Journal
+      </div>
+
+      <nav style={{ flex: 1, overflowY: "auto", padding: "4px 12px" }} className="scrollbar-none">
+        {MAIN_TABS.map(({ id, label, Ic }) => {
+          const active = tab === id;
+          return (
+            <div key={id}>
+              <button
+                type="button"
+                onClick={() => onTab(id)}
+                className="tap"
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
+                  padding: "10px 12px",
+                  borderRadius: 10,
+                  background: active ? "var(--primary-soft)" : "transparent",
+                  color: active ? "var(--primary)" : "var(--text)",
+                  fontSize: 14,
+                  fontWeight: active ? 600 : 500,
+                  textAlign: "left",
+                  marginBottom: 2,
+                }}
+                aria-current={active ? "page" : undefined}
+              >
+                <Ic size={18} />
+                <span>{label}</span>
+              </button>
+              {active && subTabs && subTabs.length > 0 && onSubChange && (
+                <div style={{ padding: "4px 0 8px 30px" }}>
+                  {subTabs.map((s) => {
+                    const on = s === activeSub;
+                    return (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => onSubChange(s)}
+                        className="tap"
+                        style={{
+                          display: "block",
+                          width: "100%",
+                          textAlign: "left",
+                          padding: "7px 12px",
+                          fontSize: 13,
+                          fontWeight: on ? 600 : 500,
+                          color: on ? "var(--text)" : "var(--text-muted)",
+                          borderRadius: 8,
+                          borderLeft: on
+                            ? "2px solid var(--primary)"
+                            : "2px solid var(--border-soft)",
+                          marginBottom: 1,
+                        }}
+                      >
+                        {s}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </nav>
+
+      <div
+        style={{
+          padding: "12px 16px",
+          borderTop: "1px solid var(--border-soft)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <div style={{ fontSize: 11, color: "var(--text-faint)" }}>v1.0</div>
+        <ThemeToggle />
+      </div>
+    </aside>
+  );
+}
+
 export function SubTabs<T extends string>({
   tabs,
   active,
   onChange,
+  hideOnDesktop = false,
 }: {
   tabs: readonly T[];
   active: T;
   onChange: (t: T) => void;
+  hideOnDesktop?: boolean;
 }) {
   return (
     <div
-      className="scrollbar-none sticky top-0 z-[8] flex shrink-0 gap-1 overflow-x-auto border-b px-4"
+      className={`scrollbar-none sticky top-0 z-[8] flex shrink-0 gap-1 overflow-x-auto border-b px-4 ${
+        hideOnDesktop ? "md:hidden" : ""
+      }`}
       style={{
         background: "var(--bg)",
         borderColor: "var(--border-soft)",
@@ -102,10 +227,8 @@ export function FAB({ onClick }: { onClick: () => void }) {
       type="button"
       onClick={onClick}
       aria-label="新しい取引を記録"
-      className="tap fixed z-[35] flex h-14 w-14 items-center justify-center rounded-full text-white"
+      className="fab-btn tap fixed z-[35] flex h-14 w-14 items-center justify-center rounded-full text-white md:h-12 md:w-12"
       style={{
-        right: "max(18px, calc((100vw - 480px)/2 + 18px))",
-        bottom: "calc(env(safe-area-inset-bottom, 0px) + 84px)",
         background: "var(--primary)",
         boxShadow:
           "0 10px 24px rgba(193,95,60,0.35), 0 2px 6px rgba(193,95,60,0.25)",

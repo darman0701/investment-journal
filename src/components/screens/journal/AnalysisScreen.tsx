@@ -94,7 +94,7 @@ export default function AnalysisScreen({ analyses, onOpenStock }: Props) {
           分析ノートはまだありません
         </div>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <div className="grid gap-[10px] grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
           {filtered.map((a) => (
             <button
               key={a.id}

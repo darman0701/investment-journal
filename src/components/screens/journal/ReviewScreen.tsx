@@ -98,7 +98,7 @@ export default function ReviewScreen({ trades }: Props) {
       className="scrollbar-none"
       style={{ flex: 1, overflowY: "auto", padding: "18px 16px 140px" }}
     >
-      <div className="card" style={{ padding: 20, marginBottom: 14 }}>
+      <div className="md:grid md:grid-cols-2 md:gap-3"><div className="card" style={{ padding: 20, marginBottom: 14 }}>
         <div
           className="serif"
           style={{ fontSize: 18, fontWeight: 600, marginBottom: 4 }}
@@ -149,6 +149,7 @@ export default function ReviewScreen({ trades }: Props) {
             ? `未レビューの取引が${stats.unreviewed}件あります。記録の鮮度が高いうちに振り返りましょう。`
             : `素晴らしい — 全ての取引に評価が付いています。`}
         </div>
+      </div>
       </div>
     </div>
   );
